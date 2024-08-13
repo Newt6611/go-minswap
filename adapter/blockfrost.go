@@ -9,7 +9,10 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/Newt6611/apollo"
+	apollo_c "github.com/Newt6611/apollo/constants"
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
+	"github.com/Newt6611/apollo/serialization/UTxO"
 	"github.com/Newt6611/go-minswap/constants"
 	"github.com/Newt6611/go-minswap/utils"
 	"github.com/blinklabs-io/gouroboros/cbor"
@@ -40,7 +43,7 @@ func NewBlockFrost(options blockfrost.APIClientOptions) *BlockFrost {
 	}
 }
 
-func (b *BlockFrost) GetV2PoolAll (ctx context.Context) ([]utils.V2PoolState, []error) {
+func (b *BlockFrost) GetV2PoolAll(ctx context.Context) ([]utils.V2PoolState, []error) {
 	address := constants.V2Config[b.network].PoolScriptHashBech32
 	asset := constants.V2Config[b.network].PoolAuthenAsset
 
@@ -129,6 +132,21 @@ func (b *BlockFrost) GetDatumByDatumHash(ctx context.Context, datumHash string) 
 	}
 
 	return data["cbor"], nil
+}
+
+func (b *BlockFrost) GetUtxoFromRef(ctx context.Context, txhash string, index int) *UTxO.UTxO {
+	network := apollo_c.MAINNET
+	switch b.options.Server {
+	case blockfrost.CardanoPreProd:
+		network = apollo_c.PREPROD
+	case blockfrost.CardanoPreview:
+		network = apollo_c.PREVIEW
+	case blockfrost.CardanoTestNet:
+		network = apollo_c.TESTNET
+	}
+
+	apo, _ := apollo.NewBlockfrostBackend(b.options.ProjectID, network)
+	return apo.GetUtxoFromRef(txhash, index)
 }
 
 func convertUtxosToPoolState(utxos []blockfrost.AddressUTXO, errs []error) ([]utils.V2PoolState, []error) {
