@@ -24,4 +24,5 @@ type Adapter interface {
 	GetV2PoolAll (ctx context.Context) ([]utils.V2PoolState, []error)
 	GetV2Pool (ctx context.Context, params QueryParams) ([]utils.V2PoolState, []error)
 	GetV2PoolByPair(ctx context.Context, assetA Fingerprint.Fingerprint, assetB Fingerprint.Fingerprint) (utils.V2PoolState, error)
+	GetDatumByDatumHash(ctx context.Context, datumHash string) (string, error)
 }

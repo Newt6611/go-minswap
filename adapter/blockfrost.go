@@ -3,7 +3,11 @@ package adapter
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
+	"net/http"
 
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
 	"github.com/Newt6611/go-minswap/constants"
@@ -14,21 +18,25 @@ import (
 
 type BlockFrost struct {
 	client    blockfrost.APIClient
-	projectId string
 	network   constants.NetworkId
+	options   blockfrost.APIClientOptions
 }
 
 func NewBlockFrost(options blockfrost.APIClientOptions) *BlockFrost {
 	client := blockfrost.NewAPIClient(options)
 	network := constants.NetworkIdMainnet
-	if options.Server != blockfrost.CardanoMainNet {
+
+	if options.Server == blockfrost.CardanoMainNet || options.Server == "" {
+		network = constants.NetworkIdMainnet
+		options.Server = blockfrost.CardanoMainNet
+	} else {
 		network = constants.NetworkIdTestnet
 	}
 
 	return &BlockFrost{
 		client:    client,
-		projectId: options.ProjectID,
 		network:   network,
+		options:   options,
 	}
 }
 
@@ -96,6 +104,31 @@ func (b *BlockFrost) GetV2PoolByPair(ctx context.Context, assetA Fingerprint.Fin
 	}
 
 	return utils.V2PoolState{}, errors.New("pool not found")
+}
+
+func (b *BlockFrost) GetDatumByDatumHash(ctx context.Context, datumHash string) (string, error) {
+	url := fmt.Sprintf("%s/scripts/datum/%s/cbor", b.options.Server, datumHash)
+
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("project_id", b.options.ProjectID)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var data map[string]string
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		return "", err
+	}
+
+	return data["cbor"], nil
 }
 
 func convertUtxosToPoolState(utxos []blockfrost.AddressUTXO, errs []error) ([]utils.V2PoolState, []error) {
