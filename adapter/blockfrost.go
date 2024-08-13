@@ -43,6 +43,10 @@ func NewBlockFrost(options blockfrost.APIClientOptions) *BlockFrost {
 	}
 }
 
+func (b *BlockFrost) NetworkId() constants.NetworkId {
+	return b.network
+}
+
 func (b *BlockFrost) GetV2PoolAll(ctx context.Context) ([]utils.V2PoolState, []error) {
 	address := constants.V2Config[b.network].PoolScriptHashBech32
 	asset := constants.V2Config[b.network].PoolAuthenAsset

@@ -5,6 +5,7 @@ import (
 
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
 	"github.com/Newt6611/apollo/serialization/UTxO"
+	"github.com/Newt6611/go-minswap/constants"
 	"github.com/Newt6611/go-minswap/utils"
 )
 
@@ -22,6 +23,7 @@ type Amount struct {
 }
 
 type Adapter interface {
+	NetworkId() constants.NetworkId
 	GetV2PoolAll(ctx context.Context) ([]utils.V2PoolState, []error)
 	GetV2Pool(ctx context.Context, params QueryParams) ([]utils.V2PoolState, []error)
 	GetV2PoolByPair(ctx context.Context, assetA Fingerprint.Fingerprint, assetB Fingerprint.Fingerprint) (utils.V2PoolState, error)
