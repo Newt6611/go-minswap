@@ -7,7 +7,6 @@ import (
 
 	"github.com/Newt6611/apollo"
 	"github.com/Newt6611/apollo/serialization/Address"
-	apollo_c "github.com/Newt6611/apollo/constants"
 	"github.com/Newt6611/apollo/serialization/Metadata"
 	"github.com/Newt6611/apollo/serialization/PlutusData"
 	"github.com/Newt6611/apollo/serialization/UTxO"
@@ -65,7 +64,7 @@ func (d *DexV2) BuildCancelOrder(ctx context.Context, builder *apollo.Apollo, ou
 		}
 	}
 	if len(orderUtxos) == 0 {
-		return builder, errors.New("order Utxos are empty")
+		return builder, errors.New("order utxos are empty")
 	}
 
 	depolyedOrderScript := constants.V2DeployedScripts[networkId].Order
@@ -88,7 +87,7 @@ func (d *DexV2) BuildCancelOrder(ctx context.Context, builder *apollo.Apollo, ou
 
 		var orderDatum OrderDatum
 		if datum := orderUtxo.Output.GetDatum(); datum != nil {
-			orderDatum, err = OrderDatumFromPlutusData(datum, constants.NetworkIdTestnet)
+			orderDatum, err = OrderDatumFromPlutusData(datum, networkId)
 			if err != nil {
 				return builder ,err
 			}
@@ -103,7 +102,7 @@ func (d *DexV2) BuildCancelOrder(ctx context.Context, builder *apollo.Apollo, ou
 			if err != nil {
 				return builder, err
 			}
-			orderDatum, err = OrderDatumFromPlutusData(&p, constants.NetworkIdTestnet)
+			orderDatum, err = OrderDatumFromPlutusData(&p, networkId)
 			if err != nil {
 				return builder, err
 			}
@@ -115,11 +114,7 @@ func (d *DexV2) BuildCancelOrder(ctx context.Context, builder *apollo.Apollo, ou
 			return builder, errors.New("only support PubKey canceller on this function")
 		}
 
-		c := apollo_c.MAINNET
-		if networkId != constants.NetworkIdMainnet {
-			c = apollo_c.TESTNET
-		}
-		addr := Address.WalletAddressFromBytes(orderDatum.Canceller.Hash, nil, c)
+		addr := Address.WalletAddressFromBytes(orderDatum.Canceller.Hash, nil, networkId)
 		builder = builder.CollectFrom(*orderUtxo, redeemer).
 			AddRequiredSignerFromAddress(*addr, true, false)
 	}

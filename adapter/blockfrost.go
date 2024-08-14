@@ -13,6 +13,7 @@ import (
 	c "github.com/Newt6611/apollo/constants"
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
 	"github.com/Newt6611/apollo/serialization/UTxO"
+	"github.com/Newt6611/apollo/txBuilding/Backend/Base"
 	"github.com/Newt6611/go-minswap/constants"
 	"github.com/Newt6611/go-minswap/utils"
 	"github.com/blinklabs-io/gouroboros/cbor"
@@ -20,15 +21,16 @@ import (
 )
 
 type BlockFrost struct {
-	client    blockfrost.APIClient
-	network   c.Network
-	options   blockfrost.APIClientOptions
+	client       blockfrost.APIClient
+	network      c.Network
+	options      blockfrost.APIClientOptions
+	chainContext Base.ChainContext
 }
 
-func NewBlockFrost(options blockfrost.APIClientOptions) *BlockFrost {
+func NewBlockFrost(options blockfrost.APIClientOptions) (*BlockFrost, error) {
 	client := blockfrost.NewAPIClient(options)
+	// we only need know whether is testnet or mainnet
 	network := c.MAINNET
-
 	if options.Server == blockfrost.CardanoMainNet || options.Server == "" {
 		network = c.MAINNET
 		options.Server = blockfrost.CardanoMainNet
@@ -36,15 +38,39 @@ func NewBlockFrost(options blockfrost.APIClientOptions) *BlockFrost {
 		network = c.TESTNET
 	}
 
-	return &BlockFrost{
-		client:    client,
-		network:   network,
-		options:   options,
+	// tmpNetwork decied by server(used only in initialization)
+	tmpNetwork := c.MAINNET
+	switch options.Server {
+	case blockfrost.CardanoPreProd:
+		tmpNetwork = c.PREPROD
+	case blockfrost.CardanoPreview:
+		tmpNetwork = c.PREVIEW
+	case blockfrost.CardanoTestNet:
+		tmpNetwork = c.TESTNET
 	}
+	bc, err := apollo.NewBlockfrostBackend(options.ProjectID, tmpNetwork)
+	if err != nil {
+		return nil, err
+	}
+
+	return &BlockFrost{
+		client:       client,
+		network:      network,
+		options:      options,
+		chainContext: &bc,
+	}, nil
 }
 
 func (b *BlockFrost) NetworkId() c.Network {
 	return b.network
+}
+
+func (b *BlockFrost) ChainContext() Base.ChainContext {
+	return b.chainContext
+}
+
+func (b *BlockFrost) NewBuilder() *apollo.Apollo {
+	return apollo.New(b.chainContext)
 }
 
 func (b *BlockFrost) GetV2PoolAll(ctx context.Context) ([]utils.V2PoolState, []error) {
@@ -104,7 +130,7 @@ func (b *BlockFrost) GetV2PoolByPair(ctx context.Context, assetA Fingerprint.Fin
 	}
 
 	for _, pool := range pools {
-		if pool.AssetA.String() == normalizedAssetA.String() && 
+		if pool.AssetA.String() == normalizedAssetA.String() &&
 			pool.AssetB.String() == normalizedAssetB.String() {
 			return pool, nil
 		}

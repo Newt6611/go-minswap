@@ -8,7 +8,7 @@ import (
 	"github.com/Newt6611/apollo/serialization/AssetName"
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
 	"github.com/Newt6611/apollo/serialization/Policy"
-	"github.com/Newt6611/go-minswap/constants"
+	c "github.com/Newt6611/apollo/constants"
 	v2 "github.com/Newt6611/go-minswap/dex/v2"
 	"github.com/Newt6611/go-minswap/utils"
 )
@@ -16,7 +16,7 @@ import (
 func TestBuildOrderAddress(t *testing.T) {
 	correctOrderAddr := "addr_test1zrdf2f2x8pq3wwk3yv936ksmt59rz94mm66yzge8zj9pk75dvyatxqgacw6azcshwwywv0nkxkdp2l2uq5qrn628mw0s7r0f20"
 	userAddr, _ := Address.DecodeAddress("addr_test1qqpfnkrx0wv3zty7c3uw9j6tvvj2tvuh7spgw80v8c353yydvyatxqgacw6azcshwwywv0nkxkdp2l2uq5qrn628mw0ssws0re")
-	orderAddr := v2.BuildOrderAddress(userAddr, constants.NetworkIdTestnet)
+	orderAddr := v2.BuildOrderAddress(userAddr, c.TESTNET)
 	if orderAddr.String() != correctOrderAddr {
 		t.Errorf("BuildOrderAddress expect %s but get %s\n", correctOrderAddr, orderAddr.String())
 	}

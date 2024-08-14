@@ -5,7 +5,7 @@ import (
 	"errors"
 	"math/big"
 
-	apollo_c "github.com/Newt6611/apollo/constants"
+	c "github.com/Newt6611/apollo/constants"
 	"github.com/Newt6611/apollo/serialization/Address"
 	"github.com/Newt6611/apollo/serialization/AssetName"
 	"github.com/Newt6611/go-minswap/constants"
@@ -16,15 +16,15 @@ const (
 	DEFAULT_TRADING_FEE_DENOMINATOR = 10000
 )
 
-func BuildOrderAddress(senderAddr Address.Address, network constants.NetworkId) Address.Address {
+func BuildOrderAddress(senderAddr Address.Address, network c.Network) Address.Address {
 	senderStakePart := senderAddr.StakingPart
 	orderAddrHex := constants.V2Config[network].OrderEnterpriseAddress
 	orderAddr, _ := Address.DecodeAddress(orderAddrHex)
 
-	apolloNetwork := apollo_c.MAINNET
+	apolloNetwork := c.MAINNET
 	networkByte := 0b0001
-	if network != constants.NetworkIdMainnet {
-		apolloNetwork = apollo_c.TESTNET
+	if network != c.MAINNET {
+		apolloNetwork = c.TESTNET
 		networkByte = 0b0000
 	}
 
@@ -33,7 +33,7 @@ func BuildOrderAddress(senderAddr Address.Address, network constants.NetworkId) 
 	return *result
 }
 
-func GetOrderScriptHash(networkId constants.NetworkId) (string, error) {
+func GetOrderScriptHash(networkId c.Network) (string, error) {
 	orderAddress := constants.V2Config[networkId].OrderEnterpriseAddress
 	orderAddr, err := Address.DecodeAddress(orderAddress)
 	if err != nil {

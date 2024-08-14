@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"math/big"
 
-	apollo_c "github.com/Newt6611/apollo/constants"
+	c "github.com/Newt6611/apollo/constants"
 	"github.com/Newt6611/apollo/plutusencoder"
 	"github.com/Newt6611/apollo/serialization/Address"
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
 	"github.com/Newt6611/apollo/serialization/PlutusData"
 	"github.com/Newt6611/apollo/serialization/Redeemer"
-	"github.com/Newt6611/go-minswap/constants"
 	"github.com/Newt6611/go-minswap/utils"
 )
 
@@ -1053,11 +1052,7 @@ type OrderDatum struct {
 	ExpiredOptions       ExpirySetting
 }
 
-func OrderDatumFromPlutusData(plutusData *PlutusData.PlutusData, networkId constants.NetworkId) (OrderDatum, error) {
-	network := apollo_c.MAINNET
-	if networkId != constants.NetworkIdMainnet {
-		network = apollo_c.TESTNET
-	}
+func OrderDatumFromPlutusData(plutusData *PlutusData.PlutusData, networkId c.Network) (OrderDatum, error) {
 	var orderDatum OrderDatum
 	data := plutusData.Value.(PlutusData.PlutusIndefArray)
 
@@ -1067,7 +1062,7 @@ func OrderDatumFromPlutusData(plutusData *PlutusData.PlutusData, networkId const
 	}
 	orderDatum.Canceller = canceller
 
-	refundReceiver := plutusencoder.DecodePlutusAddress(data[1], byte(network))
+	refundReceiver := plutusencoder.DecodePlutusAddress(data[1], byte(networkId))
 	orderDatum.RefundReceiver = refundReceiver
 
 	refundReceiverDatum, err := ExtraDatumFromPlutusData(&data[2])
@@ -1076,7 +1071,7 @@ func OrderDatumFromPlutusData(plutusData *PlutusData.PlutusData, networkId const
 	}
 	orderDatum.RefundReceiverDatum = refundReceiverDatum
 
-	successReceiver := plutusencoder.DecodePlutusAddress(data[3], byte(network))
+	successReceiver := plutusencoder.DecodePlutusAddress(data[3], byte(networkId))
 	orderDatum.SuccessReceiver = successReceiver
 
 	successReceiverDatum, err := ExtraDatumFromPlutusData(&data[4])
