@@ -7,8 +7,10 @@ import (
 
 	"github.com/Newt6611/apollo"
 	"github.com/Newt6611/apollo/serialization/Address"
+	"github.com/Newt6611/apollo/serialization/Fingerprint"
 	"github.com/Newt6611/apollo/serialization/Metadata"
 	"github.com/Newt6611/apollo/serialization/PlutusData"
+	"github.com/Newt6611/apollo/serialization/Policy"
 	"github.com/Newt6611/apollo/serialization/UTxO"
 	"github.com/Newt6611/go-minswap/adapter"
 	"github.com/Newt6611/go-minswap/constants"
@@ -47,6 +49,66 @@ func NewDexV2(adapter adapter.Adapter) *DexV2 {
 }
 func (d *DexV2) CreateBulkOrdersTx() {
 
+}
+
+func (d *DexV2) BuildSwapExactInOrder(ctx context.Context,
+	builder *apollo.Apollo,
+	swapExactIn SwapExactIn,
+	assetA Fingerprint.Fingerprint,
+	assetB Fingerprint.Fingerprint,
+	lovelace int,
+	units ...apollo.Unit) (*apollo.Apollo, error) {
+
+	networkId := d.adapter.NetworkId()
+	builderAddr := builder.GetWallet().GetAddress()
+	orderAddr := BuildOrderAddress(*builderAddr, networkId)
+
+	assetName, err := ComputeLPAsset(assetA.PolicyId.Value, assetA.AssetName.Value,
+		assetB.PolicyId.Value, assetB.AssetName.Value)
+	if err != nil {
+		return builder, err
+	}
+	lpPolicy, err := Policy.New(constants.V2Config[networkId].LpPolicyId)
+	if err != nil {
+		return builder, err
+	}
+
+	orderDatum := OrderDatum{
+		Canceller: AuthorizationMethod{
+			Type: AuthorizationMethodType_Signature,
+			Hash: builderAddr.PaymentPart,
+		},
+		RefundReceiver: *builderAddr,
+		RefundReceiverDatum: ExtraDatum{
+			Type: ExtraDatumType_No_Datum,
+		},
+		SuccessReceiver: *builderAddr,
+		LpAsset:         *Fingerprint.New(*lpPolicy, assetName),
+		Step:            swapExactIn,
+		MaxBatcherFee:   FIXED_BATCHER_FEE, //TODO: caculate batcher fee
+		ExpiredOptions:  ExpirySetting{},
+	}
+
+	orderDatumPlutusData := orderDatum.ToPlutusData()
+	builder, err = builder.
+		SetWalletAsChangeAddress().
+		PayToContract(orderAddr, &orderDatumPlutusData, lovelace, true, units...).
+		SetShelleyMetadata(Metadata.ShelleyMaryMetadata{
+			Metadata: Metadata.Metadata{
+				674: struct {
+					Msg []string `json:"msg"`
+				}{
+					Msg: []string{
+						string(MetadataMessage_SWAP_EXACT_IN_ORDER),
+					},
+				},
+			},
+		}).Complete()
+
+	if err != nil {
+		return builder, err
+	}
+	return builder, nil
 }
 
 func (d *DexV2) BuildCancelOrder(ctx context.Context, builder *apollo.Apollo, outRefs []constants.OutRef) (*apollo.Apollo, error) {
@@ -89,7 +151,7 @@ func (d *DexV2) BuildCancelOrder(ctx context.Context, builder *apollo.Apollo, ou
 		if datum := orderUtxo.Output.GetDatum(); datum != nil {
 			orderDatum, err = OrderDatumFromPlutusData(datum, networkId)
 			if err != nil {
-				return builder ,err
+				return builder, err
 			}
 		} else if dataHash := orderUtxo.Output.GetDatumHash(); dataHash != nil {
 			rawdatum, err := d.adapter.GetDatumByDatumHash(ctx, hex.EncodeToString(dataHash.Payload))
