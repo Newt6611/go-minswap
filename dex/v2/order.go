@@ -254,13 +254,13 @@ func (d DepositAmount) ToPlutusData() PlutusData.PlutusData {
 	}
 }
 
-type WithdrawAmount struct {
+type WithdrawalAmount struct {
 	Type     AmountType
 	LPAmount *big.Int
 }
 
-func WithdrawAmountFromPlutusData(plutusData *PlutusData.PlutusData) (WithdrawAmount, error) {
-	var withdrawAmount WithdrawAmount
+func WithdrawAmountFromPlutusData(plutusData *PlutusData.PlutusData) (WithdrawalAmount, error) {
+	var withdrawAmount WithdrawalAmount
 	withdrawAmount.Type = AmountType(plutusData.TagNr - 121)
 	data := plutusData.Value.(PlutusData.PlutusIndefArray)
 
@@ -273,7 +273,7 @@ func WithdrawAmountFromPlutusData(plutusData *PlutusData.PlutusData) (WithdrawAm
 	return withdrawAmount, nil
 }
 
-func (w WithdrawAmount) ToPlutusData() PlutusData.PlutusData {
+func (w WithdrawalAmount) ToPlutusData() PlutusData.PlutusData {
 	return PlutusData.PlutusData{
 		TagNr:          121 + uint64(w.Type),
 		PlutusDataType: PlutusData.PlutusArray,
@@ -625,11 +625,11 @@ func (s Deposit) StepToPlutusData() PlutusData.PlutusData {
 }
 
 type Withdraw struct {
-	Type           StepType
-	WithdrawAmount WithdrawAmount
-	MinimumAssetA  *big.Int
-	MinimumAssetB  *big.Int
-	Killable       Killable
+	Type             StepType
+	WithdrawalAmount WithdrawalAmount
+	MinimumAssetA    *big.Int
+	MinimumAssetB    *big.Int
+	Killable         Killable
 }
 
 func WithdrawFromPlutusData(plutusData *PlutusData.PlutusData) (Withdraw, error) {
@@ -638,7 +638,7 @@ func WithdrawFromPlutusData(plutusData *PlutusData.PlutusData) (Withdraw, error)
 	var withdraw Withdraw
 
 	withdraw.Type = StepType_Withdraw
-	withdraw.WithdrawAmount, err = WithdrawAmountFromPlutusData(&data[0])
+	withdraw.WithdrawalAmount, err = WithdrawAmountFromPlutusData(&data[0])
 	if err != nil {
 		return withdraw, err
 	}
@@ -669,7 +669,7 @@ func (s Withdraw) StepToPlutusData() PlutusData.PlutusData {
 		TagNr:          121 + uint64(StepType_Withdraw),
 		PlutusDataType: PlutusData.PlutusArray,
 		Value: PlutusData.PlutusIndefArray{
-			s.WithdrawAmount.ToPlutusData(),
+			s.WithdrawalAmount.ToPlutusData(),
 			PlutusData.PlutusData{
 				TagNr:          0,
 				PlutusDataType: PlutusData.PlutusInt,
@@ -688,7 +688,7 @@ func (s Withdraw) StepToPlutusData() PlutusData.PlutusData {
 type ZapOut struct {
 	Type             StepType
 	Direction        Direction
-	WithdrawalAmount WithdrawAmount
+	WithdrawalAmount WithdrawalAmount
 	MinimumReceived  *big.Int
 	Killable         Killable
 }
@@ -843,8 +843,8 @@ func (p PartialSwap) StepToPlutusData() PlutusData.PlutusData {
 }
 
 type WithdrawImbalance struct {
-	Type            StepType
-	WithdrawAmount WithdrawAmount
+	Type           StepType
+	WithdrawAmount WithdrawalAmount
 	RatioAssetA    *big.Int
 	RatioAssetB    *big.Int
 	MinimumAssetA  *big.Int
@@ -978,7 +978,7 @@ func (s SwapRouting) StepToPlutusData() PlutusData.PlutusData {
 	}
 }
 
-type Donation struct{
+type Donation struct {
 	Type StepType
 }
 
