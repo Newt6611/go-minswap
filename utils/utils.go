@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/hex"
 	"fmt"
-	"math/big"
 
 	"github.com/Newt6611/apollo/serialization/Address"
 	"github.com/Newt6611/apollo/serialization/AssetName"
@@ -64,27 +63,6 @@ func Sha3(hexString string) (string, error) {
 	hashedString := hex.EncodeToString(hashedBytes)
 
 	return hashedString, nil
-}
-
-type SlippageType int
-
-const (
-	SlippageTypeDown SlippageType = 0
-	SlippageTypeUp   SlippageType = 1
-)
-
-func ApplySlippage(slippage float64, amount *big.Int, slippageType SlippageType) *big.Int {
-	if slippageType == SlippageTypeUp {
-		amountF, _ := amount.Float64()
-		slippageAdjustedAmount := amountF * (1 + slippage)
-		return big.NewInt(int64(slippageAdjustedAmount))
-
-	} else {
-		amountF, _ := amount.Float64()
-		slippageAdjustedAmount := 1 / (1 + slippage)
-		slippageAdjustedAmount = slippageAdjustedAmount * amountF
-		return big.NewInt(int64(slippageAdjustedAmount))
-	}
 }
 
 func IsScriptAddress(address Address.Address) bool {

@@ -12,10 +12,6 @@ import (
 	"github.com/Newt6611/go-minswap/utils"
 )
 
-const (
-	DEFAULT_TRADING_FEE_DENOMINATOR = 10000
-)
-
 func BuildOrderAddress(senderAddr Address.Address, network c.Network) Address.Address {
 	senderStakePart := senderAddr.StakingPart
 	orderAddrHex := constants.V2Config[network].OrderEnterpriseAddress
@@ -83,13 +79,13 @@ pub fn calculate_amount_out(
 	}
 */
 func CalculateAmountOut(reserveIn, reserveOut, amountIn, tradingFeeNumerator *big.Int) *big.Int {
-	diff := big.NewInt(0).Sub(big.NewInt(DEFAULT_TRADING_FEE_DENOMINATOR), tradingFeeNumerator)
+	diff := big.NewInt(0).Sub(big.NewInt(utils.DEFAULT_TRADING_FEE_DENOMINATOR), tradingFeeNumerator)
 
 	inWithFee := big.NewInt(0).Mul(diff, amountIn)
 
 	numerator := big.NewInt(0).Mul(inWithFee, reserveOut)
 
-	denominator := big.NewInt(0).Mul(big.NewInt(DEFAULT_TRADING_FEE_DENOMINATOR), reserveIn)
+	denominator := big.NewInt(0).Mul(big.NewInt(utils.DEFAULT_TRADING_FEE_DENOMINATOR), reserveIn)
 	denominator = big.NewInt(0).Add(denominator, inWithFee)
 
 	return big.NewInt(0).Div(numerator, denominator)
