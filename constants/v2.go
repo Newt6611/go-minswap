@@ -1,5 +1,9 @@
 package constants
 
+import (
+	c "github.com/Newt6611/apollo/constants"
+)
+
 type v2Config struct {
 	FactoryAsset                  string
 	PoolAuthenAsset               string
@@ -19,8 +23,8 @@ type v2Config struct {
 	OrderEnterpriseAddress        string
 }
 
-var V2Config = map[NetworkId]v2Config{
-	NetworkIdMainnet: {
+var V2Config = map[c.Network]v2Config{
+	c.MAINNET: {
 		FactoryAsset:                  "f5808c2c990d86da54bfc97d89cee6efa20cd8461616359478d96b4c4d5346",
 		PoolAuthenAsset:               "f5808c2c990d86da54bfc97d89cee6efa20cd8461616359478d96b4c4d5350",
 		GlobalSettingAsset:            "f5808c2c990d86da54bfc97d89cee6efa20cd8461616359478d96b4c4d534753",
@@ -38,7 +42,7 @@ var V2Config = map[NetworkId]v2Config{
 		PoolBatchingAddress:           "stake17y02a946720zw6pw50upt2arvxsvvpvaghjtl054h0f0gjsfyjz59",
 		OrderEnterpriseAddress:        "addr1w8p79rpkcdz8x9d6tft0x0dx5mwuzac2sa4gm8cvkw5hcnqst2ctf",
 	},
-	NetworkIdTestnet: {
+	c.TESTNET: {
 		FactoryAsset:                  "d6aae2059baee188f74917493cf7637e679cd219bdfbbf4dcbeb1d0b4d5346",
 		PoolAuthenAsset:               "d6aae2059baee188f74917493cf7637e679cd219bdfbbf4dcbeb1d0b4d5350",
 		GlobalSettingAsset:            "d6aae2059baee188f74917493cf7637e679cd219bdfbbf4dcbeb1d0b4d534753",
@@ -72,8 +76,8 @@ type v2DeployedScripts struct {
 	ExpiredOrderCancellation OutRef
 }
 
-var V2DeployedScripts = map[NetworkId]v2DeployedScripts{
-	NetworkIdMainnet: {
+var V2DeployedScripts = map[c.Network]v2DeployedScripts{
+	c.MAINNET: {
 		Order: OutRef{
 			TxHash: "cf4ecddde0d81f9ce8fcc881a85eb1f8ccdaf6807f03fea4cd02da896a621776",
 			Index:  0,
@@ -99,7 +103,7 @@ var V2DeployedScripts = map[NetworkId]v2DeployedScripts{
 			Index:  0,
 		},
 	},
-	NetworkIdTestnet: {
+	c.TESTNET: {
 		Order: OutRef{
 			TxHash: "8c98f0530cba144d264fbd2731488af25257d7ce6a0cd1586fc7209363724f03",
 			Index:  0,

@@ -10,7 +10,7 @@ import (
 	"net/http"
 
 	"github.com/Newt6611/apollo"
-	apollo_c "github.com/Newt6611/apollo/constants"
+	c "github.com/Newt6611/apollo/constants"
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
 	"github.com/Newt6611/apollo/serialization/UTxO"
 	"github.com/Newt6611/go-minswap/constants"
@@ -21,19 +21,19 @@ import (
 
 type BlockFrost struct {
 	client    blockfrost.APIClient
-	network   constants.NetworkId
+	network   c.Network
 	options   blockfrost.APIClientOptions
 }
 
 func NewBlockFrost(options blockfrost.APIClientOptions) *BlockFrost {
 	client := blockfrost.NewAPIClient(options)
-	network := constants.NetworkIdMainnet
+	network := c.MAINNET
 
 	if options.Server == blockfrost.CardanoMainNet || options.Server == "" {
-		network = constants.NetworkIdMainnet
+		network = c.MAINNET
 		options.Server = blockfrost.CardanoMainNet
 	} else {
-		network = constants.NetworkIdTestnet
+		network = c.TESTNET
 	}
 
 	return &BlockFrost{
@@ -43,7 +43,7 @@ func NewBlockFrost(options blockfrost.APIClientOptions) *BlockFrost {
 	}
 }
 
-func (b *BlockFrost) NetworkId() constants.NetworkId {
+func (b *BlockFrost) NetworkId() c.Network {
 	return b.network
 }
 
@@ -139,14 +139,14 @@ func (b *BlockFrost) GetDatumByDatumHash(ctx context.Context, datumHash string) 
 }
 
 func (b *BlockFrost) GetUtxoFromRef(ctx context.Context, txhash string, index int) *UTxO.UTxO {
-	network := apollo_c.MAINNET
+	network := c.MAINNET
 	switch b.options.Server {
 	case blockfrost.CardanoPreProd:
-		network = apollo_c.PREPROD
+		network = c.PREPROD
 	case blockfrost.CardanoPreview:
-		network = apollo_c.PREVIEW
+		network = c.PREVIEW
 	case blockfrost.CardanoTestNet:
-		network = apollo_c.TESTNET
+		network = c.TESTNET
 	}
 
 	apo, _ := apollo.NewBlockfrostBackend(b.options.ProjectID, network)
