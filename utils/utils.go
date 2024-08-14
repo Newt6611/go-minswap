@@ -2,10 +2,13 @@ package utils
 
 import (
 	"encoding/hex"
+	"fmt"
 	"math/big"
 
+	"github.com/Newt6611/apollo/serialization/Address"
 	"github.com/Newt6611/apollo/serialization/AssetName"
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
+	"github.com/Newt6611/apollo/serialization/PlutusData"
 	"github.com/Newt6611/apollo/serialization/Policy"
 	"golang.org/x/crypto/sha3"
 )
@@ -53,4 +56,31 @@ func ApplySlippage(slippage float64, amount *big.Int, slippageType SlippageType)
 		slippageAdjustedAmount = slippageAdjustedAmount * amountF
 		return big.NewInt(int64(slippageAdjustedAmount))
 	}
+}
+
+func IsScriptAddress(address Address.Address) bool {
+	if address.AddressType != Address.SCRIPT_KEY &&
+		address.AddressType != Address.SCRIPT_SCRIPT &&
+		address.AddressType != Address.SCRIPT_POINTER &&
+		address.AddressType != Address.SCRIPT_NONE {
+		return false
+	}
+	return true
+}
+
+func FingerprintFromPlutusData(plutusData *PlutusData.PlutusData) (Fingerprint.Fingerprint, error) {
+	var fingerprint Fingerprint.Fingerprint
+	policyHash, ok := plutusData.Value.(PlutusData.PlutusIndefArray)[0].Value.([]byte)
+	if !ok {
+		return fingerprint, fmt.Errorf("invalid FingerprintFromPlutusData Policy\n")
+	}
+
+	assetNameHash, ok := plutusData.Value.(PlutusData.PlutusIndefArray)[1].Value.([]byte)
+	if !ok {
+		return fingerprint, fmt.Errorf("invalid FingerprintFromPlutusData AssetName\n")
+	}
+
+	fingerprint.PolicyId.Value = hex.EncodeToString(policyHash)
+	fingerprint.AssetName.Value = hex.EncodeToString(assetNameHash)
+	return fingerprint, nil
 }

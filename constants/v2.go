@@ -1,6 +1,6 @@
 package constants
 
-type v2config struct {
+type v2Config struct {
 	FactoryAsset                  string
 	PoolAuthenAsset               string
 	GlobalSettingAsset            string
@@ -19,7 +19,7 @@ type v2config struct {
 	OrderEnterpriseAddress        string
 }
 
-var V2Config = map[NetworkId]v2config{
+var V2Config = map[NetworkId]v2Config{
 	NetworkIdMainnet: {
 		FactoryAsset:                  "f5808c2c990d86da54bfc97d89cee6efa20cd8461616359478d96b4c4d5346",
 		PoolAuthenAsset:               "f5808c2c990d86da54bfc97d89cee6efa20cd8461616359478d96b4c4d5350",
@@ -55,5 +55,74 @@ var V2Config = map[NetworkId]v2config{
 		ExpiredOrderCancelAddress:     "stake_test17rytpnrpxax5p8leepgjx9cq8ecedgly6jz4xwvvv4kvzfqz6sgpf",
 		PoolBatchingAddress:           "stake_test17rann6nth9675m0y5tz32u3rfhzcfjymanxqnfyexsufu5glcajhf",
 		OrderEnterpriseAddress:        "addr_test1wrdf2f2x8pq3wwk3yv936ksmt59rz94mm66yzge8zj9pk7s0kjph3",
+	},
+}
+
+type OutRef struct {
+	TxHash string
+	Index  int
+}
+
+type v2DeployedScripts struct {
+	Order                    OutRef
+	Pool                     OutRef
+	Factory                  OutRef
+	Authen                   OutRef
+	PoolBatching             OutRef
+	ExpiredOrderCancellation OutRef
+}
+
+var V2DeployedScripts = map[NetworkId]v2DeployedScripts{
+	NetworkIdMainnet: {
+		Order: OutRef{
+			TxHash: "cf4ecddde0d81f9ce8fcc881a85eb1f8ccdaf6807f03fea4cd02da896a621776",
+			Index:  0,
+		},
+		Pool: OutRef{
+			TxHash: "2536194d2a976370a932174c10975493ab58fd7c16395d50e62b7c0e1949baea",
+			Index:  0,
+		},
+		Factory: OutRef{
+			TxHash: "59c7fa5c30cbab4e6d38f65e15d1adef71495321365588506ad089d237b602e0",
+			Index:  0,
+		},
+		Authen: OutRef{
+			TxHash: "dbc1498500a6e79baa0f34d10de55cdb4289ca6c722bd70e1e1b78a858f136b9",
+			Index:  0,
+		},
+		PoolBatching: OutRef{
+			TxHash: "d46bd227bd2cf93dedd22ae9b6d92d30140cf0d68b756f6608e38d680c61ad17",
+			Index:  0,
+		},
+		ExpiredOrderCancellation: OutRef{
+			TxHash: "ef3acc7dfc5a98bffe8f4d4400e65a9ade5a1316b2fcb7145c3b83dba38a66f5",
+			Index:  0,
+		},
+	},
+	NetworkIdTestnet: {
+		Order: OutRef{
+			TxHash: "8c98f0530cba144d264fbd2731488af25257d7ce6a0cd1586fc7209363724f03",
+			Index:  0,
+		},
+		Pool: OutRef{
+			TxHash: "9f30b1c3948a009ceebda32d0b1d25699674b2eaf8b91ef029a43bfc1073ce28",
+			Index:  0,
+		},
+		Factory: OutRef{
+			TxHash: "9741d59656e9ad54f197b0763482eede9a6fa1616c4547797eee6617f92a1396",
+			Index:  0,
+		},
+		Authen: OutRef{
+			TxHash: "c429b8ee27e5761ba8714e26e3a5899886cd28d136d43e969d4bc1acf0f72d4a",
+			Index:  0,
+		},
+		PoolBatching: OutRef{
+			TxHash: "b0a6c5512735c7a183a167eed035ac75c191d6ff5be9736dfa1f1f02f7ae5dbc",
+			Index:  0,
+		},
+		ExpiredOrderCancellation: OutRef{
+			TxHash: "ee718dd86e3cb89e802aa8b2be252fccf6f15263f4a26b5f478c5135c40264c6",
+			Index:  0,
+		},
 	},
 }

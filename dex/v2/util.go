@@ -1,6 +1,8 @@
 package v2
 
 import (
+	"encoding/hex"
+	"errors"
 	"math/big"
 
 	apollo_c "github.com/Newt6611/apollo/constants"
@@ -29,6 +31,19 @@ func BuildOrderAddress(senderAddr Address.Address, network constants.NetworkId) 
 	result := Address.WalletAddressFromBytes(orderAddr.PaymentPart, senderStakePart, apolloNetwork)
 	result.HeaderByte = Address.SCRIPT_KEY<<4 | byte(networkByte)
 	return *result
+}
+
+func GetOrderScriptHash(networkId constants.NetworkId) (string, error) {
+	orderAddress := constants.V2Config[networkId].OrderEnterpriseAddress
+	orderAddr, err := Address.DecodeAddress(orderAddress)
+	if err != nil {
+		return "", err
+	}
+	if !utils.IsScriptAddress(orderAddr) {
+		return "", errors.New("Order address should be a script address")
+	}
+
+	return hex.EncodeToString(orderAddr.PaymentPart), nil
 }
 
 func ComputeLPAsset(assetAPolicyId, assetAName, assetBPolicyId, assetBName string) (AssetName.AssetName, error) {
