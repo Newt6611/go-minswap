@@ -12,6 +12,7 @@ import (
 	"github.com/Newt6611/apollo"
 	c "github.com/Newt6611/apollo/constants"
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
+	"github.com/Newt6611/apollo/serialization/PlutusData"
 	"github.com/Newt6611/apollo/serialization/UTxO"
 	"github.com/Newt6611/apollo/txBuilding/Backend/Base"
 	"github.com/Newt6611/go-minswap/constants"
@@ -187,14 +188,14 @@ func convertUtxosToPoolState(utxos []blockfrost.AddressUTXO, errs []error) ([]ut
 		}
 
 		decodedHex, _ := hex.DecodeString(*utxo.InlineDatum)
-		var cborData cbor.Constructor
-		_, err := cbor.Decode(decodedHex, &cborData)
+		var plutusData PlutusData.PlutusData
+		_, err := cbor.Decode(decodedHex, &plutusData)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
 
-		pool, err := utils.ConvertToV2PoolState(cborData)
+		pool, err := utils.ConvertToV2PoolState(plutusData)
 		if err != nil {
 			errs = append(errs, err)
 			continue

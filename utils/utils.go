@@ -14,15 +14,43 @@ import (
 )
 
 var (
-	ADA = Fingerprint.Fingerprint {
-		PolicyId: Policy.PolicyId{ Value: "" },
-		AssetName: AssetName.AssetName{ Value: "" },
+	ADA = Fingerprint.Fingerprint{
+		PolicyId:  Policy.PolicyId{Value: ""},
+		AssetName: AssetName.AssetName{Value: ""},
 	}
-	MIN = Fingerprint.Fingerprint {
-		PolicyId: Policy.PolicyId{ Value: "e16c2dc8ae937e8d3790c7fd7168d7b994621ba14ca11415f39fed72" },
-		AssetName: AssetName.AssetName{ Value: "4d494e" },
+	MIN = Fingerprint.Fingerprint{
+		PolicyId:  Policy.PolicyId{Value: "e16c2dc8ae937e8d3790c7fd7168d7b994621ba14ca11415f39fed72"},
+		AssetName: AssetName.AssetName{Value: "4d494e"},
 	}
 )
+
+type CredentialType int
+
+const (
+	CredentialTypeKey    CredentialType = 0
+	CredentialTypeScript CredentialType = 1
+)
+
+type Credential struct {
+	Type CredentialType
+	Hash []byte
+}
+
+func CredentialFromPlutusData(plutusData *PlutusData.PlutusData) (Credential, error) {
+	var credential Credential
+	data := plutusData.Value.(PlutusData.PlutusIndefArray)[0]
+	switch data.TagNr {
+	case 121:
+		credential.Type = CredentialTypeKey
+		credential.Hash = data.Value.(PlutusData.PlutusIndefArray)[0].Value.([]byte)
+	case 121 + 1:
+		credential.Type = CredentialTypeScript
+		credential.Hash = data.Value.(PlutusData.PlutusIndefArray)[0].Value.([]byte)
+	default:
+		return credential, fmt.Errorf("invalid CredentialFromPlutusData")
+	}
+	return credential, nil
+}
 
 func Sha3(hexString string) (string, error) {
 	data, err := hex.DecodeString(hexString)
@@ -39,6 +67,7 @@ func Sha3(hexString string) (string, error) {
 }
 
 type SlippageType int
+
 const (
 	SlippageTypeDown SlippageType = 0
 	SlippageTypeUp   SlippageType = 1
