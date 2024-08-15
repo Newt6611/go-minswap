@@ -3,14 +3,13 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"math/big"
 
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
 	"github.com/Newt6611/apollo/serialization/PlutusData"
 )
 
 type FeeSharingOpt struct {
-	Numerator *big.Int
+	Numerator uint64
 	Enable    bool
 }
 
@@ -23,15 +22,15 @@ type V2PoolState struct {
 	// The Pool's Asset B
 	AssetB Fingerprint.Fingerprint
 	// Total Share of Liquidity Providers
-	TotalLiquidity *big.Int
+	TotalLiquidity uint64
 	// Asset A's balance of Liquidity Providers
-	ReserveA *big.Int
+	ReserveA uint64
 	// Asset B's balance of Liquidity Providers
-	ReserveB *big.Int
+	ReserveB uint64
 	// Numerator of Trading Fee on Asset A side
-	BaseFeeANumerator *big.Int
+	BaseFeeANumerator uint64
 	// Numerator of Trading Fee on Asset B side
-	BaseFeeBNumerator *big.Int
+	BaseFeeBNumerator uint64
 	// (Optional) Numerator of Fee Sharing percentage.
 	// This is the percentage of Trading Fee. (eg, Trading Fee is 3%, Profit Sharing is 1/6 -> Profit Sharing = 1/6 * 3%)
 	FeeSharingNumeratorOpt FeeSharingOpt
@@ -62,16 +61,15 @@ func ConvertToV2PoolState(plutusData PlutusData.PlutusData) (V2PoolState, error)
 		return V2PoolState{}, err
 	}
 
-	poolState.TotalLiquidity = big.NewInt(int64(data[3].Value.(uint64)))
-	poolState.ReserveA = big.NewInt(int64(data[4].Value.(uint64)))
-	poolState.ReserveB = big.NewInt(int64(data[5].Value.(uint64)))
-	poolState.BaseFeeANumerator = big.NewInt(int64(data[6].Value.(uint64)))
-	poolState.BaseFeeBNumerator = big.NewInt(int64(data[7].Value.(uint64)))
+	poolState.TotalLiquidity = data[3].Value.(uint64)
+	poolState.ReserveA = data[4].Value.(uint64)
+	poolState.ReserveB = data[5].Value.(uint64)
+	poolState.BaseFeeANumerator = data[6].Value.(uint64)
+	poolState.BaseFeeBNumerator = data[7].Value.(uint64)
 
 	if data[8].TagNr == 121 {
 		poolState.FeeSharingNumeratorOpt.Enable = true
-		v := data[8].Value.(PlutusData.PlutusIndefArray)[0].Value.(uint64)
-		poolState.FeeSharingNumeratorOpt.Numerator = big.NewInt(int64(v))
+		poolState.FeeSharingNumeratorOpt.Numerator = data[8].Value.(PlutusData.PlutusIndefArray)[0].Value.(uint64)
 	} else {
 		poolState.FeeSharingNumeratorOpt.Enable = false
 	}

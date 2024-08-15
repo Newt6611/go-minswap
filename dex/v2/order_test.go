@@ -2,7 +2,6 @@ package v2_test
 
 import (
 	"encoding/hex"
-	"math/big"
 	"testing"
 
 	"github.com/Newt6611/apollo/serialization/Address"
@@ -100,8 +99,8 @@ func buildOrderDatum(step v2.StepI) []v2.OrderDatum {
 			LpAsset:       *fingerprint,
 			MaxBatcherFee: v2.FIXED_BATCHER_FEE,
 			ExpiredOptions: v2.ExpirySetting{
-				ExpiredTime:        big.NewInt(1721010208050),
-				MaxCancellationTip: big.NewInt(300_000),
+				ExpiredTime:        1721010208050,
+				MaxCancellationTip: 300_000,
 			},
 		},
 	}
@@ -111,19 +110,19 @@ func TestSwapExactInStepConverter(t *testing.T) {
 	step1 := v2.SwapExactIn{
 		SwapAmount: v2.SwapAmount{
 			Type:   v2.AmountType_Specific_Amount,
-			Amount: big.NewInt(10000),
+			Amount: 10000,
 		},
 		Direction:       v2.Direction_A_To_B,
-		MinimumReceived: big.NewInt(1),
+		MinimumReceived: 1,
 		Killable:        v2.Killable_Pending_On_Failed,
 	}
 	step2 := v2.SwapExactIn{
 		SwapAmount: v2.SwapAmount{
 			Type:   v2.AmountType_All,
-			Amount: big.NewInt(10000),
+			Amount: 10000,
 		},
 		Direction:       v2.Direction_B_To_A,
-		MinimumReceived: big.NewInt(1),
+		MinimumReceived: 1,
 		Killable:        v2.Killable_Kill_On_Failed,
 	}
 	datums := []v2.OrderDatum{}
@@ -152,18 +151,18 @@ func TestStopStepConverter(t *testing.T) {
 	step1 := v2.Stop{
 		SwapAmount: v2.SwapAmount{
 			Type:   v2.AmountType_Specific_Amount,
-			Amount: big.NewInt(10000),
+			Amount: 10000,
 		},
 		Direction:    v2.Direction_A_To_B,
-		StopReceived: big.NewInt(1),
+		StopReceived: 1,
 	}
 	step2 := v2.Stop{
 		SwapAmount: v2.SwapAmount{
 			Type:   v2.AmountType_Specific_Amount,
-			Amount: big.NewInt(10000),
+			Amount: 10000,
 		},
 		Direction:    v2.Direction_B_To_A,
-		StopReceived: big.NewInt(1),
+		StopReceived: 1,
 	}
 	datums := []v2.OrderDatum{}
 	datums = append(datums, buildOrderDatum(step1)...)
@@ -191,20 +190,20 @@ func TestOCOStepConverter(t *testing.T) {
 	step1 := v2.OCO{
 		SwapAmount: v2.SwapAmount{
 			Type:   v2.AmountType_Specific_Amount,
-			Amount: big.NewInt(10000),
+			Amount: 10000,
 		},
 		Direction:       v2.Direction_A_To_B,
-		StopReceived:    big.NewInt(1),
-		MinimumReceived: big.NewInt(1),
+		StopReceived:    1,
+		MinimumReceived: 1,
 	}
 	step2 := v2.OCO{
 		SwapAmount: v2.SwapAmount{
 			Type:   v2.AmountType_All,
-			Amount: big.NewInt(10000),
+			Amount: 10000,
 		},
 		Direction:       v2.Direction_B_To_A,
-		StopReceived:    big.NewInt(1),
-		MinimumReceived: big.NewInt(1),
+		StopReceived:    1,
+		MinimumReceived: 1,
 	}
 	datums := []v2.OrderDatum{}
 	datums = append(datums, buildOrderDatum(step1)...)
@@ -232,19 +231,19 @@ func TestSwapExactOutStepConverter(t *testing.T) {
 	step1 := v2.SwapExactOut{
 		MaximumSwapAmount: v2.SwapAmount{
 			Type:   v2.AmountType_Specific_Amount,
-			Amount: big.NewInt(10000),
+			Amount: 10000,
 		},
 		Direction:        v2.Direction_A_To_B,
-		ExpectedReceived: big.NewInt(1),
+		ExpectedReceived: 1,
 		Killable:         v2.Killable_Pending_On_Failed,
 	}
 	step2 := v2.SwapExactOut{
 		MaximumSwapAmount: v2.SwapAmount{
 			Type:   v2.AmountType_All,
-			Amount: big.NewInt(10000),
+			Amount: 10000,
 		},
 		Direction:        v2.Direction_B_To_A,
-		ExpectedReceived: big.NewInt(1),
+		ExpectedReceived: 1,
 		Killable:         v2.Killable_Kill_On_Failed,
 	}
 	datums := []v2.OrderDatum{}
@@ -273,19 +272,19 @@ func TestDepositStepConverter(t *testing.T) {
 	step1 := v2.Deposit{
 		DepositAmount: v2.DepositAmount{
 			Type:           v2.AmountType_Specific_Amount,
-			DepositAmountA: big.NewInt(10000),
-			DepositAmountB: big.NewInt(10000),
+			DepositAmountA: 10000,
+			DepositAmountB: 10000,
 		},
-		MinimumLP: big.NewInt(1),
+		MinimumLP: 1,
 		Killable:  v2.Killable_Pending_On_Failed,
 	}
 	step2 := v2.Deposit{
 		DepositAmount: v2.DepositAmount{
 			Type:           v2.AmountType_All,
-			DepositAmountA: big.NewInt(10000),
-			DepositAmountB: big.NewInt(10000),
+			DepositAmountA: 10000,
+			DepositAmountB: 10000,
 		},
-		MinimumLP: big.NewInt(1),
+		MinimumLP: 1,
 		Killable:  v2.Killable_Kill_On_Failed,
 	}
 	datums := []v2.OrderDatum{}
@@ -314,19 +313,19 @@ func TestWithdrawStepConverter(t *testing.T) {
 	step1 := v2.Withdraw{
 		WithdrawalAmount: v2.WithdrawalAmount{
 			Type:     v2.AmountType_Specific_Amount,
-			LPAmount: big.NewInt(10000),
+			LPAmount: 10000,
 		},
-		MinimumAssetA: big.NewInt(1),
-		MinimumAssetB: big.NewInt(1),
+		MinimumAssetA: 1,
+		MinimumAssetB: 1,
 		Killable:      v2.Killable_Pending_On_Failed,
 	}
 	step2 := v2.Withdraw{
 		WithdrawalAmount: v2.WithdrawalAmount{
 			Type:     v2.AmountType_All,
-			LPAmount: big.NewInt(10000),
+			LPAmount: 10000,
 		},
-		MinimumAssetA: big.NewInt(1),
-		MinimumAssetB: big.NewInt(1),
+		MinimumAssetA: 1,
+		MinimumAssetB: 1,
 		Killable:      v2.Killable_Kill_On_Failed,
 	}
 	datums := []v2.OrderDatum{}
@@ -355,19 +354,19 @@ func TestZapOutStepConverter(t *testing.T) {
 	step1 := v2.ZapOut{
 		WithdrawalAmount: v2.WithdrawalAmount{
 			Type:     v2.AmountType_Specific_Amount,
-			LPAmount: big.NewInt(10000),
+			LPAmount: 10000,
 		},
 		Direction:       v2.Direction_A_To_B,
-		MinimumReceived: big.NewInt(1),
+		MinimumReceived: 1,
 		Killable:        v2.Killable_Pending_On_Failed,
 	}
 	step2 := v2.ZapOut{
 		WithdrawalAmount: v2.WithdrawalAmount{
 			Type:     v2.AmountType_All,
-			LPAmount: big.NewInt(10000),
+			LPAmount: 10000,
 		},
 		Direction:       v2.Direction_B_To_A,
-		MinimumReceived: big.NewInt(1),
+		MinimumReceived: 1,
 		Killable:        v2.Killable_Kill_On_Failed,
 	}
 	datums := []v2.OrderDatum{}
@@ -394,22 +393,22 @@ func TestZapOutStepConverter(t *testing.T) {
 
 func TestPartialSwapStepConverter(t *testing.T) {
 	step1 := v2.PartialSwap{
-		TotalSwapAmount: big.NewInt(10000),
-		IoRatioNumerator: big.NewInt(1),
-		IoRatioDenominator: big.NewInt(1),
-		Hops: big.NewInt(3),
+		TotalSwapAmount: 10000,
+		IoRatioNumerator: 1,
+		IoRatioDenominator: 1,
+		Hops: 3,
 		Direction: v2.Direction_A_To_B,
-		MaxBatcherFeeEachTime: big.NewInt(0).Mul(v2.FIXED_BATCHER_FEE, big.NewInt(3)),
-		MinimumSwapAmountRequired: big.NewInt(1000),
+		MaxBatcherFeeEachTime: v2.FIXED_BATCHER_FEE * 3,
+		MinimumSwapAmountRequired: 1000,
 	}
 	step2 := v2.PartialSwap{
-		TotalSwapAmount: big.NewInt(10000),
-		IoRatioNumerator: big.NewInt(1),
-		IoRatioDenominator: big.NewInt(1),
-		Hops: big.NewInt(3),
+		TotalSwapAmount: 10000,
+		IoRatioNumerator: 1,
+		IoRatioDenominator: 1,
+		Hops: 3,
 		Direction: v2.Direction_B_To_A,
-		MaxBatcherFeeEachTime: big.NewInt(0).Mul(v2.FIXED_BATCHER_FEE, big.NewInt(3)),
-		MinimumSwapAmountRequired: big.NewInt(1000),
+		MaxBatcherFeeEachTime: v2.FIXED_BATCHER_FEE * 3,
+		MinimumSwapAmountRequired: 1000,
 	}
 	datums := []v2.OrderDatum{}
 	datums = append(datums, buildOrderDatum(step1)...)
@@ -437,22 +436,22 @@ func TestWithdrawImbalanceStepConverter(t *testing.T) {
 	step1 := v2.WithdrawImbalance{
 		WithdrawAmount: v2.WithdrawalAmount{
 			Type:     v2.AmountType_Specific_Amount,
-			LPAmount: big.NewInt(10000),
+			LPAmount: 10000,
 		},
 		Killable: v2.Killable_Pending_On_Failed,
-		RatioAssetA: big.NewInt(1),
-		RatioAssetB: big.NewInt(1),
-		MinimumAssetA: big.NewInt(1000),
+		RatioAssetA: 1,
+		RatioAssetB: 1,
+		MinimumAssetA: 1000,
 	}
 	step2 := v2.WithdrawImbalance{
 		WithdrawAmount: v2.WithdrawalAmount{
 			Type:     v2.AmountType_All,
-			LPAmount: big.NewInt(10000),
+			LPAmount: 10000,
 		},
 		Killable: v2.Killable_Kill_On_Failed,
-		RatioAssetA: big.NewInt(1),
-		RatioAssetB: big.NewInt(1),
-		MinimumAssetA: big.NewInt(1000),
+		RatioAssetA: 1,
+		RatioAssetB: 1,
+		MinimumAssetA: 1000,
 	}
 	datums := []v2.OrderDatum{}
 	datums = append(datums, buildOrderDatum(step1)...)
@@ -480,9 +479,9 @@ func TestSwapRoutingStepConverter(t *testing.T) {
 	step := v2.SwapRouting{
 		SwapAmount: v2.SwapAmount{
 			Type:   v2.AmountType_Specific_Amount,
-			Amount: big.NewInt(10000),
+			Amount: 10000,
 		},
-		MinimumReceived: big.NewInt(1),
+		MinimumReceived: 1,
 		Routings: []v2.Route {
 			{
 				LPAsset: Fingerprint.Fingerprint{

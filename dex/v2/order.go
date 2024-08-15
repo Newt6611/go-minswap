@@ -3,7 +3,6 @@ package v2
 import (
 	"errors"
 	"fmt"
-	"math/big"
 
 	c "github.com/Newt6611/apollo/constants"
 	"github.com/Newt6611/apollo/plutusencoder"
@@ -14,8 +13,8 @@ import (
 	"github.com/Newt6611/go-minswap/utils"
 )
 
-var (
-	FIXED_BATCHER_FEE = big.NewInt(2_000_000)
+const (
+	FIXED_BATCHER_FEE = 2_000_000
 )
 
 type AuthorizationMethodType int
@@ -158,7 +157,7 @@ const (
 
 type SwapAmount struct {
 	Type   AmountType
-	Amount *big.Int
+	Amount uint64
 }
 
 func SwapAmountFromPlutusData(plutusData *PlutusData.PlutusData) (SwapAmount, error) {
@@ -168,7 +167,7 @@ func SwapAmountFromPlutusData(plutusData *PlutusData.PlutusData) (SwapAmount, er
 	if !ok {
 		return swapAmount, fmt.Errorf("invalid SwapAmountFromPlutusData")
 	}
-	swapAmount.Amount = big.NewInt(int64(amount))
+	swapAmount.Amount = amount
 	return swapAmount, nil
 }
 
@@ -211,8 +210,8 @@ func (k Killable) ToPlutusData() PlutusData.PlutusData {
 
 type DepositAmount struct {
 	Type           AmountType
-	DepositAmountA *big.Int
-	DepositAmountB *big.Int
+	DepositAmountA uint64
+	DepositAmountB uint64
 }
 
 func DepositAmountFromPlutusData(plutusData *PlutusData.PlutusData) (DepositAmount, error) {
@@ -224,13 +223,13 @@ func DepositAmountFromPlutusData(plutusData *PlutusData.PlutusData) (DepositAmou
 	if !ok {
 		return depositAmount, errors.New("invalid DepositAmountFromPlutusData DepositAmountA")
 	}
-	depositAmount.DepositAmountA = big.NewInt(int64(depositAmountA))
+	depositAmount.DepositAmountA = depositAmountA
 
 	depositAmountB, ok := data[1].Value.(uint64)
 	if !ok {
 		return depositAmount, errors.New("invalid DepositAmountFromPlutusData DepositAmountB")
 	}
-	depositAmount.DepositAmountB = big.NewInt(int64(depositAmountB))
+	depositAmount.DepositAmountB = depositAmountB
 
 	return depositAmount, nil
 }
@@ -256,7 +255,7 @@ func (d DepositAmount) ToPlutusData() PlutusData.PlutusData {
 
 type WithdrawalAmount struct {
 	Type     AmountType
-	LPAmount *big.Int
+	LPAmount uint64
 }
 
 func WithdrawAmountFromPlutusData(plutusData *PlutusData.PlutusData) (WithdrawalAmount, error) {
@@ -268,7 +267,7 @@ func WithdrawAmountFromPlutusData(plutusData *PlutusData.PlutusData) (Withdrawal
 	if !ok {
 		return withdrawAmount, errors.New("invalid WithdrawAmountFromPlutusData LPAmount")
 	}
-	withdrawAmount.LPAmount = big.NewInt(int64(lpAmount))
+	withdrawAmount.LPAmount = lpAmount
 
 	return withdrawAmount, nil
 }
@@ -360,7 +359,7 @@ type SwapExactIn struct {
 	Type            StepType
 	Direction       Direction
 	SwapAmount      SwapAmount
-	MinimumReceived *big.Int
+	MinimumReceived uint64
 	Killable        Killable
 }
 
@@ -384,7 +383,7 @@ func SwapExactInFromPlutusData(plutusData *PlutusData.PlutusData) (SwapExactIn, 
 	if !ok {
 		return swapExactIn, fmt.Errorf("invalid SwapExactInFromPlutusData")
 	}
-	swapExactIn.MinimumReceived = big.NewInt(int64(minimumReceived))
+	swapExactIn.MinimumReceived = minimumReceived
 
 	killable, err := KillableFromPlutusData(&data[3])
 	if err != nil {
@@ -415,7 +414,7 @@ type Stop struct {
 	Type         StepType
 	Direction    Direction
 	SwapAmount   SwapAmount
-	StopReceived *big.Int
+	StopReceived uint64
 }
 
 func StopFromPlutusData(plutusData *PlutusData.PlutusData) (Stop, error) {
@@ -438,7 +437,7 @@ func StopFromPlutusData(plutusData *PlutusData.PlutusData) (Stop, error) {
 	if !ok {
 		return stop, fmt.Errorf("invalid StopFromPlutusData")
 	}
-	stop.StopReceived = big.NewInt(int64(stopReceived))
+	stop.StopReceived = stopReceived
 
 	return stop, nil
 }
@@ -463,8 +462,8 @@ type OCO struct {
 	Type            StepType
 	Direction       Direction
 	SwapAmount      SwapAmount
-	MinimumReceived *big.Int
-	StopReceived    *big.Int
+	MinimumReceived uint64
+	StopReceived    uint64
 }
 
 func OCOFromPlutusData(plutusData *PlutusData.PlutusData) (OCO, error) {
@@ -487,13 +486,13 @@ func OCOFromPlutusData(plutusData *PlutusData.PlutusData) (OCO, error) {
 	if !ok {
 		return oco, fmt.Errorf("invalid OCOFromPlutusData")
 	}
-	oco.MinimumReceived = big.NewInt(int64(minimumReceived))
+	oco.MinimumReceived = minimumReceived
 
 	stopReceived, ok := data[3].Value.(uint64)
 	if !ok {
 		return oco, fmt.Errorf("invalid OCOFromPlutusData")
 	}
-	oco.StopReceived = big.NewInt(int64(stopReceived))
+	oco.StopReceived = stopReceived
 
 	return oco, nil
 }
@@ -523,7 +522,7 @@ type SwapExactOut struct {
 	Type              StepType
 	Direction         Direction
 	MaximumSwapAmount SwapAmount
-	ExpectedReceived  *big.Int
+	ExpectedReceived  uint64
 	Killable          Killable
 }
 
@@ -547,7 +546,7 @@ func SwapExactOutFromPlutusData(plutusData *PlutusData.PlutusData) (SwapExactOut
 	if !ok {
 		return swapExactOut, fmt.Errorf("invalid SwapExactOutFromPlutusData")
 	}
-	swapExactOut.ExpectedReceived = big.NewInt(int64(expectedReceived))
+	swapExactOut.ExpectedReceived = expectedReceived
 
 	killable, err := KillableFromPlutusData(&data[3])
 	if err != nil {
@@ -578,7 +577,7 @@ func (s SwapExactOut) StepToPlutusData() PlutusData.PlutusData {
 type Deposit struct {
 	Type          StepType
 	DepositAmount DepositAmount
-	MinimumLP     *big.Int
+	MinimumLP     uint64
 	Killable      Killable
 }
 
@@ -597,7 +596,7 @@ func DepositFromPlutusData(plutusData *PlutusData.PlutusData) (Deposit, error) {
 	if !ok {
 		return deposit, fmt.Errorf("invalid DepositFromPlutusData")
 	}
-	deposit.MinimumLP = big.NewInt(int64(minimumLP))
+	deposit.MinimumLP = minimumLP
 
 	killable, err := KillableFromPlutusData(&data[2])
 	if err != nil {
@@ -627,8 +626,8 @@ func (s Deposit) StepToPlutusData() PlutusData.PlutusData {
 type Withdraw struct {
 	Type             StepType
 	WithdrawalAmount WithdrawalAmount
-	MinimumAssetA    *big.Int
-	MinimumAssetB    *big.Int
+	MinimumAssetA    uint64
+	MinimumAssetB    uint64
 	Killable         Killable
 }
 
@@ -647,13 +646,13 @@ func WithdrawFromPlutusData(plutusData *PlutusData.PlutusData) (Withdraw, error)
 	if !ok {
 		return withdraw, fmt.Errorf("invalid WithdrawFromPlutusData")
 	}
-	withdraw.MinimumAssetA = big.NewInt(int64(minimumAssetA))
+	withdraw.MinimumAssetA = minimumAssetA
 
 	minimumAssetB, ok := data[2].Value.(uint64)
 	if !ok {
 		return withdraw, fmt.Errorf("invalid WithdrawFromPlutusData")
 	}
-	withdraw.MinimumAssetB = big.NewInt(int64(minimumAssetB))
+	withdraw.MinimumAssetB = minimumAssetB
 
 	killable, err := KillableFromPlutusData(&data[3])
 	if err != nil {
@@ -689,7 +688,7 @@ type ZapOut struct {
 	Type             StepType
 	Direction        Direction
 	WithdrawalAmount WithdrawalAmount
-	MinimumReceived  *big.Int
+	MinimumReceived  uint64
 	Killable         Killable
 }
 
@@ -713,7 +712,7 @@ func ZapOutFromPlutusData(plutusData *PlutusData.PlutusData) (ZapOut, error) {
 	if !ok {
 		return zapOut, fmt.Errorf("invalid ZapOutFromPlutusData")
 	}
-	zapOut.MinimumReceived = big.NewInt(int64(minimumReceived))
+	zapOut.MinimumReceived = minimumReceived
 
 	killable, err := KillableFromPlutusData(&data[3])
 	if err != nil {
@@ -744,12 +743,12 @@ func (z ZapOut) StepToPlutusData() PlutusData.PlutusData {
 type PartialSwap struct {
 	Type                      StepType
 	Direction                 Direction
-	TotalSwapAmount           *big.Int
-	IoRatioNumerator          *big.Int
-	IoRatioDenominator        *big.Int
-	Hops                      *big.Int
-	MinimumSwapAmountRequired *big.Int
-	MaxBatcherFeeEachTime     *big.Int
+	TotalSwapAmount           uint64
+	IoRatioNumerator          uint64
+	IoRatioDenominator        uint64
+	Hops                      uint64
+	MinimumSwapAmountRequired uint64
+	MaxBatcherFeeEachTime     uint64
 }
 
 func PartialSwapFromPlutusData(plutusData *PlutusData.PlutusData) (PartialSwap, error) {
@@ -767,37 +766,37 @@ func PartialSwapFromPlutusData(plutusData *PlutusData.PlutusData) (PartialSwap, 
 	if !ok {
 		return partialSwap, fmt.Errorf("invalid PartialSwapFromPlutusData")
 	}
-	partialSwap.TotalSwapAmount = big.NewInt(int64(totalSwapAmount))
+	partialSwap.TotalSwapAmount = totalSwapAmount
 
 	ioRatioNumerator, ok := data[2].Value.(uint64)
 	if !ok {
 		return partialSwap, fmt.Errorf("invalid PartialSwapFromPlutusData")
 	}
-	partialSwap.IoRatioNumerator = big.NewInt(int64(ioRatioNumerator))
+	partialSwap.IoRatioNumerator = ioRatioNumerator
 
 	ioRatioDenominator, ok := data[3].Value.(uint64)
 	if !ok {
 		return partialSwap, fmt.Errorf("invalid PartialSwapFromPlutusData")
 	}
-	partialSwap.IoRatioDenominator = big.NewInt(int64(ioRatioDenominator))
+	partialSwap.IoRatioDenominator = ioRatioDenominator
 
 	hops, ok := data[4].Value.(uint64)
 	if !ok {
 		return partialSwap, fmt.Errorf("invalid PartialSwapFromPlutusData")
 	}
-	partialSwap.Hops = big.NewInt(int64(hops))
+	partialSwap.Hops = hops
 
 	minimumSwapAmountRequired, ok := data[5].Value.(uint64)
 	if !ok {
 		return partialSwap, fmt.Errorf("invalid PartialSwapFromPlutusData")
 	}
-	partialSwap.MinimumSwapAmountRequired = big.NewInt(int64(minimumSwapAmountRequired))
+	partialSwap.MinimumSwapAmountRequired = minimumSwapAmountRequired
 
 	maxBatcherFeeEachTime, ok := data[6].Value.(uint64)
 	if !ok {
 		return partialSwap, fmt.Errorf("invalid PartialSwapFromPlutusData")
 	}
-	partialSwap.MaxBatcherFeeEachTime = big.NewInt(int64(maxBatcherFeeEachTime))
+	partialSwap.MaxBatcherFeeEachTime = maxBatcherFeeEachTime
 
 	return partialSwap, nil
 }
@@ -845,9 +844,9 @@ func (p PartialSwap) StepToPlutusData() PlutusData.PlutusData {
 type WithdrawImbalance struct {
 	Type           StepType
 	WithdrawAmount WithdrawalAmount
-	RatioAssetA    *big.Int
-	RatioAssetB    *big.Int
-	MinimumAssetA  *big.Int
+	RatioAssetA    uint64
+	RatioAssetB    uint64
+	MinimumAssetA  uint64
 	Killable       Killable
 }
 
@@ -866,19 +865,19 @@ func WithdrawImbalanceFromPlutusData(plutusData *PlutusData.PlutusData) (Withdra
 	if !ok {
 		return withdrawImbalance, fmt.Errorf("invalid WithdrawImbalanceFromPlutusData")
 	}
-	withdrawImbalance.RatioAssetA = big.NewInt(int64(ratioAssetA))
+	withdrawImbalance.RatioAssetA = ratioAssetA
 
 	ratioAssetB, ok := data[2].Value.(uint64)
 	if !ok {
 		return withdrawImbalance, fmt.Errorf("invalid WithdrawImbalanceFromPlutusData")
 	}
-	withdrawImbalance.RatioAssetB = big.NewInt(int64(ratioAssetB))
+	withdrawImbalance.RatioAssetB = ratioAssetB
 
 	minimumAssetA, ok := data[3].Value.(uint64)
 	if !ok {
 		return withdrawImbalance, fmt.Errorf("invalid WithdrawImbalanceFromPlutusData")
 	}
-	withdrawImbalance.MinimumAssetA = big.NewInt(int64(minimumAssetA))
+	withdrawImbalance.MinimumAssetA = minimumAssetA
 
 	killable, err := KillableFromPlutusData(&data[4])
 	if err != nil {
@@ -919,7 +918,7 @@ type SwapRouting struct {
 	Type            StepType
 	Routings        []Route
 	SwapAmount      SwapAmount
-	MinimumReceived *big.Int
+	MinimumReceived uint64
 }
 
 func SwapRoutingFromPlutusData(plutusData *PlutusData.PlutusData) (SwapRouting, error) {
@@ -947,7 +946,7 @@ func SwapRoutingFromPlutusData(plutusData *PlutusData.PlutusData) (SwapRouting, 
 	if !ok {
 		return swapRouting, fmt.Errorf("invalid SwapRoutingFromPlutusData")
 	}
-	swapRouting.MinimumReceived = big.NewInt(int64(minimumReceived))
+	swapRouting.MinimumReceived = minimumReceived
 
 	return swapRouting, nil
 }
@@ -997,8 +996,8 @@ func (d Donation) StepToPlutusData() PlutusData.PlutusData {
 }
 
 type ExpirySetting struct {
-	ExpiredTime        *big.Int
-	MaxCancellationTip *big.Int
+	ExpiredTime        uint64
+	MaxCancellationTip uint64
 }
 
 func ExpirySettingFromPlutusData(plutusData *PlutusData.PlutusData) (ExpirySetting, error) {
@@ -1006,15 +1005,15 @@ func ExpirySettingFromPlutusData(plutusData *PlutusData.PlutusData) (ExpirySetti
 	data := plutusData.Value.(PlutusData.PlutusDefArray)
 
 	if plutusData.TagNr == 121 {
-		expirySetting.ExpiredTime = big.NewInt(int64(data[0].Value.(uint64)))
-		expirySetting.MaxCancellationTip = big.NewInt(int64(data[1].Value.(int64)))
+		expirySetting.ExpiredTime = data[0].Value.(uint64)
+		expirySetting.MaxCancellationTip = data[1].Value.(uint64)
 	}
 
 	return expirySetting, nil
 }
 
 func (e ExpirySetting) ToPlutusData() PlutusData.PlutusData {
-	if e.ExpiredTime != nil || e.MaxCancellationTip != nil {
+	if e.ExpiredTime != 0 || e.MaxCancellationTip != 0 {
 		return PlutusData.PlutusData{
 			TagNr:          121,
 			PlutusDataType: PlutusData.PlutusArray,
@@ -1048,7 +1047,7 @@ type OrderDatum struct {
 	SuccessReceiverDatum ExtraDatum
 	LpAsset              Fingerprint.Fingerprint
 	Step                 StepI
-	MaxBatcherFee        *big.Int
+	MaxBatcherFee        uint64
 	ExpiredOptions       ExpirySetting
 }
 
@@ -1091,7 +1090,7 @@ func OrderDatumFromPlutusData(plutusData *PlutusData.PlutusData, networkId c.Net
 		return orderDatum, err
 	}
 
-	orderDatum.MaxBatcherFee = big.NewInt(int64(data[7].Value.(uint64)))
+	orderDatum.MaxBatcherFee = data[7].Value.(uint64)
 	orderDatum.ExpiredOptions, err = ExpirySettingFromPlutusData(&data[8])
 	if err != nil {
 		return orderDatum, err

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"math"
-	"math/big"
 )
 
 type SlippageType int
@@ -12,63 +11,60 @@ const (
 	SlippageTypeUp   SlippageType = 1
 )
 
-func ApplySlippage(slippage float64, amount *big.Int, slippageType SlippageType) *big.Int {
+func ApplySlippage(slippage float64, amount uint64, slippageType SlippageType) uint64 {
 	if slippageType == SlippageTypeUp {
-		amountF, _ := amount.Float64()
+		amountF := float64(amount)
 		slippageAdjustedAmount := amountF * (1 + slippage)
-		return big.NewInt(int64(slippageAdjustedAmount))
+		return uint64(slippageAdjustedAmount)
 
 	} else {
-		amountF, _ := amount.Float64()
+		amountF := float64(amount)
 		slippageAdjustedAmount := 1 / (1 + slippage)
 		slippageAdjustedAmount = slippageAdjustedAmount * amountF
-		return big.NewInt(int64(slippageAdjustedAmount))
+		return uint64(slippageAdjustedAmount)
 	}
 }
 
-func CalculateDepositAmount(amountA *big.Int, amountB *big.Int, pool V2PoolState) *big.Int {
-	ratioA := (amountA.Int64() * pool.TotalLiquidity.Int64()) / pool.ReserveA.Int64()
-	ratioB := (amountB.Int64() * pool.TotalLiquidity.Int64()) / pool.ReserveB.Int64()
+// TODO: Haven't tested this yet
+func CalculateDepositAmount(amountA uint64, amountB uint64, pool V2PoolState) uint64 {
+	ratioA := (amountA * pool.TotalLiquidity) / pool.ReserveA
+	ratioB := (amountB * pool.TotalLiquidity) / pool.ReserveB
 
 	if ratioA > ratioB {
 		swapAmountA := CalculateDepositSwapAmount(amountA, amountB, pool.ReserveA, pool.ReserveB, pool.BaseFeeANumerator)
-		lpAmount := ((amountA.Int64() * swapAmountA.Denominator - swapAmountA.Numerator) * pool.TotalLiquidity.Int64()) /
-        (pool.ReserveA.Int64() * swapAmountA.Denominator + swapAmountA.Numerator);
-		return big.NewInt(lpAmount)
+		lpAmount := ((amountA * swapAmountA.Denominator - swapAmountA.Numerator) * pool.TotalLiquidity) /
+        (pool.ReserveA * swapAmountA.Denominator + swapAmountA.Numerator);
+		return lpAmount
 
 	} else if ratioA < ratioB {
 		swapAmountB := CalculateDepositSwapAmount(amountB, amountA, pool.ReserveB, pool.ReserveA, pool.BaseFeeBNumerator)
-		lpAmount := ((amountB.Int64() * swapAmountB.Denominator - swapAmountB.Numerator) * pool.TotalLiquidity.Int64()) /
-			(pool.ReserveB.Int64() * swapAmountB.Denominator + swapAmountB.Numerator);
-		return big.NewInt(lpAmount)
+		lpAmount := ((amountB * swapAmountB.Denominator - swapAmountB.Numerator) * pool.TotalLiquidity) /
+			(pool.ReserveB * swapAmountB.Denominator + swapAmountB.Numerator);
+		return lpAmount
 	}
 
-	return big.NewInt(ratioA)
+	return ratioA
 }
 
 type Fraction struct {
-	Numerator   int64
-	Denominator int64
+	Numerator   uint64
+	Denominator uint64
 }
 
-func CalculateDepositSwapAmount(amountIn, amountOut, reserveIn, reserveOut, tradingFeeNumerator *big.Int) Fraction {
-	amountIni := amountIn.Int64()
-	amountOuti := amountOut.Int64()
-	reserveIni := reserveIn.Int64()
-	reserveOuti := reserveOut.Int64()
-	tradingFeeNumeratori := tradingFeeNumerator.Int64()
+// TODO: Haven't tested this yet
+func CalculateDepositSwapAmount(amountIn, amountOut, reserveIn, reserveOut, tradingFeeNumerator uint64) Fraction {
+	x := (amountOut + reserveOut) * reserveIn
+	y := 4 * (amountOut + reserveOut) *
+		(amountOut * reserveIn * reserveIn - amountIn * reserveIn * reserveOut)
+	z := 2 * (amountOut + reserveOut)
+	a := uint64Pow(x) * uint64Pow(uint64(2) *
+		DEFAULT_TRADING_FEE_DENOMINATOR - tradingFeeNumerator) - y *
+		DEFAULT_TRADING_FEE_DENOMINATOR * (DEFAULT_TRADING_FEE_DENOMINATOR - tradingFeeNumerator)
 
-	x := (amountOuti + reserveOuti) * reserveIni
-	y := 4 * (amountOuti + reserveOuti) *
-		(amountOuti*reserveIni*reserveIni - amountIni*reserveIni*reserveOuti)
-	z := 2 * (amountOuti + reserveOuti)
-	a := int64Pow(x)*int64Pow(int64(2)*
-		DEFAULT_TRADING_FEE_DENOMINATOR-tradingFeeNumeratori) - y*
-		DEFAULT_TRADING_FEE_DENOMINATOR*(DEFAULT_TRADING_FEE_DENOMINATOR-tradingFeeNumeratori)
+	b := (uint64(2) * DEFAULT_TRADING_FEE_DENOMINATOR - tradingFeeNumerator) * x
+	numerator := uint64(math.Sqrt(float64(a)) - float64(b))
+	denominator := z * (DEFAULT_TRADING_FEE_DENOMINATOR - tradingFeeNumerator)
 
-	b := (int64(2)*DEFAULT_TRADING_FEE_DENOMINATOR - tradingFeeNumeratori) * x
-	numerator := int64(math.Sqrt(float64(a)) - float64(b))
-	denominator := z * (DEFAULT_TRADING_FEE_DENOMINATOR - tradingFeeNumeratori)
 	return Fraction{
 		Numerator:   numerator,
 		Denominator: denominator,
@@ -76,5 +72,9 @@ func CalculateDepositSwapAmount(amountIn, amountOut, reserveIn, reserveOut, trad
 }
 
 func int64Pow(i int64) int64 {
+	return i * i
+}
+
+func uint64Pow(i uint64) uint64 {
 	return i * i
 }

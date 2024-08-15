@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"math/big"
 
 	c "github.com/Newt6611/apollo/constants"
 	"github.com/Newt6611/go-minswap/adapter"
@@ -39,7 +38,7 @@ func SwapExactInExample() {
 		log.Fatal(err)
 	}
 
-	swapAmount := big.NewInt(5_000000);
+	swapAmount := uint64(5_000000);
 	amountOut := v2.CalculateAmountOut(pool.ReserveA, pool.ReserveB, swapAmount, pool.BaseFeeANumerator)
 
 	// 20%
@@ -69,4 +68,3 @@ func SwapExactInExample() {
 
 	fmt.Println(hex.EncodeToString(id.Payload))
 }
-

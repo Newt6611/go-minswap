@@ -1,14 +1,13 @@
 package v2_test
 
 import (
-	"math/big"
 	"testing"
 
+	c "github.com/Newt6611/apollo/constants"
 	"github.com/Newt6611/apollo/serialization/Address"
 	"github.com/Newt6611/apollo/serialization/AssetName"
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
 	"github.com/Newt6611/apollo/serialization/Policy"
-	c "github.com/Newt6611/apollo/constants"
 	v2 "github.com/Newt6611/go-minswap/dex/v2"
 	"github.com/Newt6611/go-minswap/utils"
 )
@@ -43,13 +42,13 @@ func TestComputeLPAsset(t *testing.T) {
 
 func TestCalculateAmountOut(t *testing.T) {
 	out := v2.CalculateAmountOut(
-		big.NewInt(25434557769208),
-		big.NewInt(413300185707175),
-		big.NewInt(1000000000),
-		big.NewInt(30))
+		25434557769208,
+		413300185707175,
+		1000000000,
+		30)
 
-	anwser := big.NewInt(16200168971)
-	if anwser.Cmp(out) != 0 {
-		t.Errorf("Expected %s, but get %s\n", anwser.String(), out.String())
+	anwser := uint64(16200168971)
+	if out != anwser {
+		t.Errorf("Expected %d, but get %d\n", anwser, out)
 	}
 }

@@ -54,7 +54,7 @@ func GetPoolPrice() {
 		log.Fatal("can't find MIN/ADA pool")
 		return
 	}
-	reserveA, _ := MinAdaPool.ReserveA.Float64()
-	reserveB, _ := MinAdaPool.ReserveB.Float64()
+	reserveA := float64(MinAdaPool.ReserveA)
+	reserveB := float64(MinAdaPool.ReserveB)
 	fmt.Println(reserveA / reserveB)
 }

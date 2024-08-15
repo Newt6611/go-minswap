@@ -78,15 +78,17 @@ pub fn calculate_amount_out(
 	  numerator / denominator
 	}
 */
-func CalculateAmountOut(reserveIn, reserveOut, amountIn, tradingFeeNumerator *big.Int) *big.Int {
-	diff := big.NewInt(0).Sub(big.NewInt(utils.DEFAULT_TRADING_FEE_DENOMINATOR), tradingFeeNumerator)
+func CalculateAmountOut(reserveIn, reserveOut, amountIn, tradingFeeNumerator uint64) uint64 {
+	diff := big.NewInt(0).
+		Sub(big.NewInt(int64(utils.DEFAULT_TRADING_FEE_DENOMINATOR)),
+			big.NewInt(int64(tradingFeeNumerator)))
 
-	inWithFee := big.NewInt(0).Mul(diff, amountIn)
+	inWithFee := big.NewInt(0).Mul(diff, big.NewInt(int64(amountIn)))
 
-	numerator := big.NewInt(0).Mul(inWithFee, reserveOut)
+	numerator := big.NewInt(0).Mul(inWithFee, big.NewInt(int64(reserveOut)))
 
-	denominator := big.NewInt(0).Mul(big.NewInt(utils.DEFAULT_TRADING_FEE_DENOMINATOR), reserveIn)
+	denominator := big.NewInt(0).Mul(big.NewInt(int64(utils.DEFAULT_TRADING_FEE_DENOMINATOR)), big.NewInt(int64(reserveIn)))
 	denominator = big.NewInt(0).Add(denominator, inWithFee)
 
-	return big.NewInt(0).Div(numerator, denominator)
+	return numerator.Div(numerator, denominator).Uint64()
 }
