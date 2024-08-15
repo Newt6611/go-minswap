@@ -181,6 +181,65 @@ func (b *BlockFrost) GetUtxoFromRef(ctx context.Context, txhash string, index in
 	return apo.GetUtxoFromRef(txhash, index)
 }
 
+func (b *BlockFrost) GetAllStablePools(ctx context.Context) ([]utils.StablePoolState, []error) {
+	poolAddresses := []string{}
+	for _, cfg := range constants.StableConfig[b.network] {
+		poolAddresses = append(poolAddresses, cfg.PoolAddress)
+	}
+
+	var errs []error
+	var poolStates []utils.StablePoolState
+	for _, poolAddress := range poolAddresses {
+		resultChan := b.client.AddressUTXOsAll(ctx, poolAddress)
+
+		for {
+			result, keep := <-resultChan
+
+			for _, utxo := range result.Res {
+				var datum string
+				// Find Datum From InlineDatum Or DataHash
+				if utxo.InlineDatum != nil {
+					datum = *utxo.InlineDatum
+
+				} else if utxo.DataHash != nil {
+					s, err := b.GetDatumByDatumHash(ctx, *utxo.DataHash)
+					if err != nil {
+						errs = append(errs, err)
+						continue
+					}
+					datum = s
+
+				} else {
+					errs = append(errs, errors.New("cannot find datum of stable pool " + utxo.Address))
+				}
+
+				// Convert To StablePoolState From Datum
+				if datum != "" {
+					decodedHex, _ := hex.DecodeString(datum)
+					var plutusData PlutusData.PlutusData
+					_, err := cbor.Decode(decodedHex, &plutusData)
+					if err != nil {
+						errs = append(errs, err)
+						continue
+					}
+					poolState, err := utils.ConvertToStablePoolState(plutusData)
+					if err != nil {
+						errs = append(errs, err)
+						continue
+					}
+					poolStates = append(poolStates, poolState)
+				}
+			}
+
+			if !keep {
+				break
+			}
+		}
+	}
+
+	return poolStates, errs
+}
+
 func (b *BlockFrost) GetStablePoolByNFT(ctx context.Context, nft Fingerprint.Fingerprint) (utils.StablePoolState, error) {
 	cfgs := constants.StableConfig[b.network]
 	var poolAddress Address.Address

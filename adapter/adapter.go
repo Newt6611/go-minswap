@@ -33,5 +33,6 @@ type Adapter interface {
 	GetV2PoolByPair(ctx context.Context, assetA Fingerprint.Fingerprint, assetB Fingerprint.Fingerprint) (utils.V2PoolState, error)
 	GetDatumByDatumHash(ctx context.Context, datumHash string) (string, error)
 	GetUtxoFromRef(ctx context.Context, txhash string, index int) *UTxO.UTxO
+	GetAllStablePools(ctx context.Context) ([]utils.StablePoolState, []error)
 	GetStablePoolByNFT(ctx context.Context, nft Fingerprint.Fingerprint) (utils.StablePoolState, error)
 }

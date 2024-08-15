@@ -63,5 +63,6 @@ fmt.Println(reserveA / reserveB)
 	- [X] Order Cancellation
 	- [ ] Pool Creation
 - [ ] StableSwap
+	- [x] Get Pool Data
 	- [ ] Order Creation
 	- [ ] Order Cancellation

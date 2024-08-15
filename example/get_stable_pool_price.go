@@ -29,7 +29,7 @@ func GetStablePoolPrice() {
 		AssetName: AssetName.AssetName{Value: nftHex[56:]},
 	}
 
-	pool, err := blockfrostAdapter.GetStableByNFT(ctx, nft)
+	pool, err := blockfrostAdapter.GetStablePoolByNFT(ctx, nft)
 	if err != nil {
 		log.Fatal(err)
 	}
