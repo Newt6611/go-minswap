@@ -181,7 +181,7 @@ func (b *BlockFrost) GetUtxoFromRef(ctx context.Context, txhash string, index in
 	return apo.GetUtxoFromRef(txhash, index)
 }
 
-func (b *BlockFrost) GetStableByNFT(ctx context.Context, nft Fingerprint.Fingerprint) (utils.StablePoolState, error) {
+func (b *BlockFrost) GetStablePoolByNFT(ctx context.Context, nft Fingerprint.Fingerprint) (utils.StablePoolState, error) {
 	cfgs := constants.StableConfig[b.network]
 	var poolAddress Address.Address
 	var asset string
