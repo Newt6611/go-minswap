@@ -11,6 +11,7 @@ import (
 
 	"github.com/Newt6611/apollo"
 	c "github.com/Newt6611/apollo/constants"
+	"github.com/Newt6611/apollo/serialization/Address"
 	"github.com/Newt6611/apollo/serialization/Fingerprint"
 	"github.com/Newt6611/apollo/serialization/PlutusData"
 	"github.com/Newt6611/apollo/serialization/UTxO"
@@ -178,6 +179,67 @@ func (b *BlockFrost) GetUtxoFromRef(ctx context.Context, txhash string, index in
 
 	apo, _ := apollo.NewBlockfrostBackend(b.options.ProjectID, network)
 	return apo.GetUtxoFromRef(txhash, index)
+}
+
+func (b *BlockFrost) GetStableByNFT(ctx context.Context, nft Fingerprint.Fingerprint) (utils.StablePoolState, error) {
+	cfgs := constants.StableConfig[b.network]
+	var poolAddress Address.Address
+	var asset string
+	for _, cfg := range cfgs {
+		if cfg.NFTAsset == nft.PolicyId.Value+nft.AssetName.Value {
+			poolAddress, _ = Address.DecodeAddress(cfg.PoolAddress)
+			asset = cfg.NFTAsset
+		}
+	}
+
+	if poolAddress.Hrp == "" {
+		return utils.StablePoolState{}, errors.New("cannot find Stable Pool having NFT " + nft.String())
+	}
+
+	var poolState utils.StablePoolState
+	resultChan := b.client.AddressUTXOsAssetAll(ctx, poolAddress.String(), asset)
+	for {
+		result, keep := <-resultChan
+		if result.Err != nil {
+			return poolState, result.Err
+		}
+
+		for _, utxo := range result.Res {
+			var datum string
+
+			// Find Datum From InlineDatum Or DataHash
+			if utxo.InlineDatum != nil {
+				datum = *utxo.InlineDatum
+
+			} else if utxo.DataHash != nil {
+				s, err := b.GetDatumByDatumHash(ctx, *utxo.DataHash)
+				if err != nil {
+					return poolState, err
+				}
+				datum = s
+
+			} else {
+				return poolState, errors.New("cannot find datum of stable pool")
+			}
+
+			// Convert To StablePoolState From Datum
+			if datum != "" {
+				decodedHex, _ := hex.DecodeString(datum)
+				var plutusData PlutusData.PlutusData
+				_, err := cbor.Decode(decodedHex, &plutusData)
+				if err != nil {
+					return poolState, err
+				}
+				return utils.ConvertToStablePoolState(plutusData)
+			}
+		}
+
+		if !keep {
+			break
+		}
+	}
+
+	return poolState, errors.New("cannot find datum of stable pool")
 }
 
 func convertUtxosToPoolState(utxos []blockfrost.AddressUTXO, errs []error) ([]utils.V2PoolState, []error) {
