@@ -92,3 +92,11 @@ func CalculateAmountOut(reserveIn, reserveOut, amountIn, tradingFeeNumerator uin
 
 	return numerator.Div(numerator, denominator).Uint64()
 }
+
+func getTagNr(tag uint64) uint64 {
+	if tag < 7 {
+		return 121 + tag
+	} else {
+		return 1280 + tag - 7
+	}
+}

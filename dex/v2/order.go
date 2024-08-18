@@ -326,7 +326,12 @@ type StepI interface {
 }
 
 func StepFromPlutusData(plutusData *PlutusData.PlutusData) (StepI, error) {
-	stepType := StepType(plutusData.TagNr - 121)
+	var stepType StepType
+	if plutusData.TagNr >= 121 && plutusData.TagNr <= 127 {
+		stepType = StepType(plutusData.TagNr - 121)
+	} else if plutusData.TagNr >= 1280 && plutusData.TagNr <= 1400 {
+		stepType = StepType(plutusData.TagNr - 1280 + 7)
+	}
 	switch stepType {
 	case StepType_Swap_Exact_In:
 		return SwapExactInFromPlutusData(plutusData)
@@ -803,7 +808,7 @@ func PartialSwapFromPlutusData(plutusData *PlutusData.PlutusData) (PartialSwap, 
 
 func (p PartialSwap) StepToPlutusData() PlutusData.PlutusData {
 	return PlutusData.PlutusData{
-		TagNr:          121 + uint64(StepType_Partial_Swap),
+		TagNr:          getTagNr(uint64(StepType_Partial_Swap)),
 		PlutusDataType: PlutusData.PlutusArray,
 		Value: PlutusData.PlutusIndefArray{
 			p.Direction.ToPlutusData(),
@@ -890,7 +895,7 @@ func WithdrawImbalanceFromPlutusData(plutusData *PlutusData.PlutusData) (Withdra
 
 func (w WithdrawImbalance) StepToPlutusData() PlutusData.PlutusData {
 	return PlutusData.PlutusData{
-		TagNr:          121 + uint64(StepType_Withdraw_Imbalance),
+		TagNr:          getTagNr(uint64(StepType_Withdraw_Imbalance)),
 		PlutusDataType: PlutusData.PlutusArray,
 		Value: PlutusData.PlutusIndefArray{
 			w.WithdrawAmount.ToPlutusData(),
@@ -929,12 +934,12 @@ func SwapRoutingFromPlutusData(plutusData *PlutusData.PlutusData) (SwapRouting, 
 	swapRouting.Type = StepType_Swap_Routing
 
 	routingData := data[0].Value.(PlutusData.PlutusIndefArray)
-	for i, r := range routingData {
+	for _, r := range routingData {
 		route, err := RouteFromPlutusData(&r)
 		if err != nil {
 			return swapRouting, err
 		}
-		swapRouting.Routings[i] = route
+		swapRouting.Routings = append(swapRouting.Routings, route)
 	}
 
 	swapRouting.SwapAmount, err = SwapAmountFromPlutusData(&data[1])
@@ -963,7 +968,7 @@ func (s SwapRouting) StepToPlutusData() PlutusData.PlutusData {
 	}
 
 	return PlutusData.PlutusData{
-		TagNr:          121 + uint64(StepType_Swap_Routing),
+		TagNr:          getTagNr(uint64(StepType_Swap_Routing)),
 		PlutusDataType: PlutusData.PlutusArray,
 		Value: PlutusData.PlutusIndefArray{
 			routingsPlutusData,
@@ -989,7 +994,7 @@ func DonationFromPlutusData(plutusData *PlutusData.PlutusData) (Donation, error)
 
 func (d Donation) StepToPlutusData() PlutusData.PlutusData {
 	return PlutusData.PlutusData{
-		TagNr:          121 + uint64(StepType_Donation),
+		TagNr:          getTagNr(uint64(StepType_Donation)),
 		PlutusDataType: PlutusData.PlutusArray,
 		Value:          PlutusData.PlutusDefArray{},
 	}
